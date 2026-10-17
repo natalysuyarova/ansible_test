@@ -1,0 +1,42 @@
+- hosts: servers
+  tasks:
+    - name: apt apdate
+      ansible.builtin.apt:
+#        name: apt
+#        state: present
+        update_cache: true
+      become: true
+      tags: [packages, apt]
+
+    - name: установка пакето
+      ansible.builtin.apt:
+        name:
+           - git
+           - make
+           - nodejs
+        state: present
+      become: true
+      tags: [packages, install]
+
+    - name: Создать пользователей arya, sansa, tirion
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: present
+        create_home: true
+        shell: /bin/bash
+      loop:
+        - arya
+        - sansa
+        - tirion
+      become: true
+      tags: [users]
+    
+    - name: удаление пакетов
+      ansible.builtin.apt:
+        name:
+          - git
+          - make
+          - nodejs
+        state: absent
+      become: true
+      tags: uninstall

@@ -1,0 +1,36 @@
+- hosts: servers
+  tasks:
+    - name: install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+      become: true
+      tags: nginx
+
+    - name: install redis server
+      ansible.builtin.apt:
+        name: redis-server
+        state: present
+        update_cache: true
+      become: true
+
+    - name: update cron
+      ansible.builtin.cron:
+        name: "check dirs"
+        minute: "0"
+        hour: "5,2"
+        job: "ls -alh > /dev/null"
+
+    - name: update nginx config
+      ansible.builtin.copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+      become: true
+      tags: [nginx, config]
+
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: true
+      tags: nginx
