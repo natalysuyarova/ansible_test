@@ -1,0 +1,54 @@
+#- hosts: servers
+
+- name: Развернуть Nginx с HTML-страницей
+  hosts: servers
+  become: true
+  gather_facts: true
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+
+  tasks:
+    - name: Установить nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      tags: nginx
+
+    - name: Убедиться, что nginx запущен и включён в автозапуск
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+      tags: nginx  
+
+    - name: Скопировать index.html
+      ansible.builtin.copy:
+        src: index.html
+        dest: /usr/share/nginx/html/index.html
+        owner: root
+        group: root
+        mode: '0644'
+      tags: nginx  
+
+    - name: Скопировать nginx.conf
+      ansible.builtin.copy:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+        validate: 'nginx -t -c %s'
+      notify: Reload nginx
+      tags: nginx
+
+    - name: удаление пакетов
+      ansible.builtin.apt:
+        name: nginx 
+        state: absent
+      become: true
+      tags: uninstall
