@@ -35,3 +35,5 @@ check:
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --syntax-check
 uninstall:
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --tag uninstall
+nginx:
+	ansible-playbook -i $(INVENTORY) nginx_vars.yml

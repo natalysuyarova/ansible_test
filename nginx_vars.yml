@@ -1,0 +1,62 @@
+---
+- name: Развернуть Nginx с HTML-страницей через шаблон
+  hosts: servers
+  become: true
+  gather_facts: true
+
+  vars:
+    nginx_port: 8080
+    root_dir: /usr/share/nginx/html
+    nginx_user: "{{ 'www-data' if ansible_facts['os_family'] == 'Debian' else 'nginx' }}"
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+  tasks:
+    - name: Установить nginx (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Установить nginx (RHEL/CentOS)
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Убедиться, что nginx запущен и включён в автозапуск
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Создать директорию для сайта
+      ansible.builtin.file:
+        path: "{{ root_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Скопировать index.html в корень сайта
+      ansible.builtin.copy:
+        src: files/index.html
+        dest: "{{ root_dir }}/index.html"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Сгенерировать nginx.conf из шаблона
+      ansible.builtin.template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+        validate: 'nginx -t -c %s'
+      notify: Restart nginx
