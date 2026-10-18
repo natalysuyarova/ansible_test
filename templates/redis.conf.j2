@@ -1,0 +1,18 @@
+bind {{ redis_bind }}
+port {{ redis_port }}
+protected-mode yes
+daemonize yes
+supervised systemd
+pidfile /var/run/redis/redis-server.pid
+loglevel notice
+logfile {{ redis_logfile }}
+databases {{ redis_databases }}
+dir {{ redis_dir }}
+dbfilename dump.rdb
+requirepass {{ redis_password }}
+maxmemory {{ redis_maxmemory }}
+maxmemory-policy {{ redis_maxmemory_policy }}
+save 900 1
+save 300 10
+save 60 10000
+appendonly no

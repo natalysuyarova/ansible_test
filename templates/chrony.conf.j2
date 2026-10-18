@@ -1,0 +1,19 @@
+# /etc/chrony.conf
+
+# 1. Российские серверы точного времени ВНИИФТРИ (Госэталон)
+server ntp1.vniiftri.ru iburst
+server ntp2.vniiftri.ru iburst
+server ntp3.vniiftri.ru iburst
+server ntp4.vniiftri.ru iburst
+
+# 2. Альтернатива: национальный пул NTP России (раскомментируйте, если хотите использовать его)
+# pool ru.pool.ntp.org iburst
+
+# 3. Файл для хранения дрейфа часов (обязательный параметр)
+driftfile /var/lib/chrony/drift
+
+# 4. Разрешить chronyd корректировать время скачком, если отклонение больше 1 секунды
+makestep 1.0 3
+
+# 5. Синхронизировать аппаратные часы (RTC) с системными
+rtcsync

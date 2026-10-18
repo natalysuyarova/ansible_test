@@ -1,0 +1,32 @@
+- name: установка chrony
+  hosts: webserver
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: установка chrony
+      ansible.builtin.apt:
+        name: chrony
+        state: present
+        update_cache: true
+      tags: chronyc
+    - name: chrony status
+      ansible.builtin.service:
+        name: chrony
+        state: started
+        enabled: true
+      tags: chrony
+    - name: crnony_conf
+      ansible.builtin.template:
+        src: templates/chrony.conf.j2
+        dest: /etc/chrony/chrony.conf
+      tags: chrony
+
+  handlers:
+    - name: Reload chrony
+      ansible.builtin.service:
+        name: chrony
+        state: reloaded
+
+
+  

@@ -1,0 +1,68 @@
+
+
+- name: Развернуть Radis
+  hosts: servers
+  become: true
+  gather_facts: true
+
+
+  vars: 
+    root_dir: /etc/redis/redis.conf
+    redis_port: 6379
+    redis_bind: 0.0.0.0
+    redis_password: s3cr3t
+    redis_maxmemory: 256mb
+    redis_maxmemory_policy: allkeys-lru
+    redis_databases: 16
+    redis_dir: /var/lib/redis
+    redis_logfile: /var/log/redis/redis-server.log
+
+
+  handlers:
+    - name: Reload redis-server
+      ansible.builtin.service:
+        name: redis-server
+        state: reloaded
+
+  tasks:
+    - name: Установить redis-server
+      ansible.builtin.apt:
+        name: redis-server
+        state: present
+        update_cache: true
+      tags: redis-server
+ 
+
+    - name: Убедиться, что redis-server запущен и включён в автозапуск
+      ansible.builtin.service:
+        name: redis-serverx
+        state: started
+        enabled: true
+      tags: redis-server  
+
+    - name: Скопировать index.html
+      ansible.builtin.copy:
+        src: files/index.html
+        dest: "{{ root_dir }}/index.html"
+        owner: root
+        group: root
+        mode: '0644'
+      tags: nginx  
+
+    - name: Скопировать Radis
+      ansible.builtin.template:
+        src: templates/redis.conf.j2
+        dest: "{{ root_dir }}/nginx.conf"
+        owner: root
+        group: root
+        mode: '0644'
+        validate: 'nginx -t -c %s'
+      notify: Reload nginx
+      tags: nginx
+
+    - name: удаление пакетов
+      ansible.builtin.apt:
+        name: redis-server          
+        state: absent
+      become: true
+      tags: uninstall
