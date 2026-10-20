@@ -1,0 +1,27 @@
+
+
+- name: Развернуть Git
+  hosts: servers
+  become: true
+  gather_facts: true
+ 
+
+  tasks:
+    - name: Установить Git
+      ansible.builtin.apt:
+        name: git
+        state: present
+        update_cache: true
+      tags: Git
+ 
+
+#    - name: Убедиться, что Git запущен и включён в автозапуск
+#      ansible.builtin.service:
+#        name: git
+#        state: started
+#      tags: Git 
+
+    - name: показать информацию
+      ansible.builtin.debug:
+        msg: "Производитель ОС: {{ ansible_distribution }}, версия ОС: {{ ansible_distribution_version }}"
+      
