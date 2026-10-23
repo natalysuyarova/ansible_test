@@ -4,7 +4,7 @@
   hosts: servers
   become: true
   gather_facts: true
-
+ # vars: server_name
   handlers:
     - name: Reload nginx
       ansible.builtin.service:

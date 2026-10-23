@@ -1,0 +1,66 @@
+---
+- name: Развернуть страницу с именем сервера
+  hosts: webservers
+  become: true
+  gather_facts: true
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+  tasks:
+    - name: Установить nginx (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Установить nginx (RHEL/CentOS)
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Создать директорию сайта
+      ansible.builtin.file:
+        path: "{{ root_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Развернуть index.html из шаблона
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: "{{ root_dir }}/index.html"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart nginx
+
+    - name: Настроить nginx на директорию сайта
+      ansible.builtin.copy:
+        dest: /etc/nginx/conf.d/site.conf
+        content: |
+          server {
+              listen 80;
+              server_name {{ server_name }};
+
+              location / {
+                  root {{ root_dir }};
+                  index index.html;
+              }
+          }
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart nginx
+
+    - name: Убедиться, что nginx запущен и включён
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
