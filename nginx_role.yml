@@ -1,0 +1,15 @@
+- hosts: all
+  pre_tasks: # Выполняются до ролей
+    - name: Подготовка перед ролью
+      ansible.builtin.apt:
+        name: curl
+        state: present
+      become: true
+  roles:
+    - role: nginxinc.nginx
+  tasks: # Выполняются после ролей
+    - name: Действия после роли
+      ansible.builtin.service:
+        name: nginx
+        state: started
+      become: true

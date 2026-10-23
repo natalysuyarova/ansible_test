@@ -1,0 +1,10 @@
+#roles:
+  # Роль из Ansible Galaxy
+#  - name: geerlingguy.java
+#  - name: ajsalminen.hosts
+
+---
+roles:
+  - name: geerlingguy.git
+  - name: geerlingguy.postgresql
+  - name: geerlingguy.nodejs

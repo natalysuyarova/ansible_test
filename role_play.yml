@@ -1,0 +1,20 @@
+---
+- name: Настройка сервера с использованием Galaxy ролей
+  hosts: servers
+  become: true
+  gather_facts: true
+
+  vars:
+    # Переопределяем переменную для роли Node.js.
+    # Роль установит Node.js версии 18.x вместо версии по умолчанию (16.x).
+    nodejs_version: "18.x"[reference:2]
+
+    # Пример переопределения переменной для PostgreSQL.
+    # Устанавливаем кодировку locale в 'ru_RU.UTF-8'.
+    postgresql_locales:
+      - 'ru_RU.UTF-8'[reference:3]
+
+  roles:
+    - role: geerlingguy.git
+    - role: geerlingguy.postgresql
+    - role: geerlingguy.nodejs
